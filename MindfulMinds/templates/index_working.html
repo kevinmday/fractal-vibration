@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mindful Markets</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #111;
+            color: #eee;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #00ff88;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            position: relative;
+            cursor: pointer;
+        }
+
+        h1:hover::after {
+            content: "This system merges AI with Intention Theory, using Autonomous Agents to monitor changes in a stock's Intention Field — shaped by market and human signals — to trigger precision trades.";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75em;
+            white-space: normal;
+            max-width: 300px;
+            z-index: 1000;
+        }
+
+        .card {
+            background: #222;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            box-shadow: 0 0 10px #000;
+            font-size: 1.2em;
+        }
+
+        .label {
+            font-weight: bold;
+            font-size: 1.4em;
+            position: relative;
+        }
+
+        .label:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: -5px;
+            left: 105%;
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: opacity 0.3s;
+            font-size: 1em;
+            width: 250px;
+            z-index: 1;
+        }
+
+        .value {
+            font-size: 1.6em;
+            color: #0f0;
+        }
+
+        .signal {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffcc00;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            background: #00ff88;
+            color: #000;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #00cc66;
+        }
+
+        .explanation {
+            font-size: 1.1em;
+            color: #bbb;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .news-feed, .watchlist, .technical-indicators, .alert-section, .latent-trades {
+            font-size: 1.2em;
+            color: #fff;
+            margin-top: 30px;
+            background-color: #333;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .latent-trade-item {
+            margin-bottom: 10px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: 25px;
+            margin-top: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1 title="An AI-powered platform that blends human intention with market insights for mindful trading.">📊 Mindful Markets</h1>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button onclick="buyNow()">💰 Buy Now</button>
+        <button onclick="sellNow()">💸 Sell Now</button>
+        <button onclick="setLatentTrade()">🔮 Set Latent Trade</button>
+    </div>
+
+    <div class="card">
+        <p><span class="label">Ticker:</span> <span id="ticker"></span></p>
+        <p><span class="label">Price:</span> $<span id="price"></span></p>
+
+        <p><span class="label">Intention Force: 
+            <span class="tooltip">This shows the accumulated force of human intentions affecting the market or company trend.</span>
+        </span> <span class="value" id="f_total"></span></p>
+
+        <p><span class="label">Future Intention Likelihood Scale: 
+            <span class="tooltip">This scale measures the probability of future events based on current intentions and market behavior.</span>
+        </span> <span class="value" id="fils"></span></p>
+
+        <p><span class="label">TRUMP Tensor Chaos Factor: 
+            <span class="tooltip">A complex factor that quantifies the potential market disruption due to specific chaotic influence factors.</span>
+        </span> <span class="value" id="ttcf"></span></p>
+
+        <p class="signal">Signal: <span id="signal">Latent Trade</span></p>
+
+        <button onclick="loadData()">🔄 Refresh</button>
+
+        <br><br>
+        <label for="tickerInput">Change Ticker Symbol: </label>
+        <input type="text" id="tickerInput" value="AAPL" oninput="updateTicker()">
+    </div>
+
+    <canvas id="priceChart" width="400" height="75"></canvas>
+
+    <div class="news-feed">
+        <h2>Latest News</h2>
+        <p>Stock news will appear here...</p>
+    </div>
+
+    <div class="watchlist">
+        <h2>Your Watchlist</h2>
+        <ul id="watchlist-items">
+            <li>TSLA</li>
+            <li>AAPL</li>
+            <li>NVID</li>
+        </ul>
+    </div>
+
+    <div class="technical-indicators">
+        <h2>Technical Indicators</h2>
+        <ul>
+            <li>Moving Average: 123.45</li>
+            <li>RSI: 70.5</li>
+            <li>Bollinger Bands: 120-130</li>
+        </ul>
+    </div>
+
+    <div class="alert-section">
+        <h2>Set Alerts</h2>
+        <label for="price-alert">Price Alert ($):</label>
+        <input type="number" id="price-alert" placeholder="Enter price" min="0">
+        <button onclick="setPriceAlert()">Set Alert</button>
+    </div>
+
+    <div class="latent-trades">
+        <h2>Latent Trades</h2>
+        <div id="latent-trades-list">
+            <div class="latent-trade-item">Waiting for AI agent to scout for trades...</div>
+        </div>
+        <button onclick="triggerLatentTrade()">🔄 Trigger Latent Trade</button>
+    </div>
+
+    <script>
+        let currentTicker = 'AAPL';
+
+ 
+        function loadData() {
+            fetch(`/stock/${currentTicker}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('ticker').innerText = data.symbol;
+                    document.getElementById('price').innerText = data.price;
+                    document.getElementById('f_total').innerText = data.ucip_force;
+                    document.getElementById('fils').innerText = data.fils;
+                    document.getElementById('ttcf').innerText = data.ttcf;
+
+                    document.getElementById('signal').innerText =
+                        data.fils > 0.7 ? "→ Strong Buy Signal" :
+                        data.fils < 0.3 ? "→ Potential Drop" : "→ Hold Pattern";
+                });
+        }
+
+        function updateTicker() {
+            const newTicker = document.getElementById('tickerInput').value.trim().toUpperCase();
+            if (newTicker && newTicker !== currentTicker) {
+                currentTicker = newTicker;
+                loadData();
+            }
+        }
+
+        function buyNow() {
+            alert(`Buying ${currentTicker} now.`);
+        }
+
+        function sellNow() {
+            alert(`Selling ${currentTicker} now.`);
+        }
+
+        function setLatentTrade() {
+            alert(`Setting latent trade for ${currentTicker}.`);
+        }
+
+        function triggerLatentTrade() {
+            alert("Triggering latent trade search...");
+        }
+
+        function setPriceAlert() {
+            const alertPrice = document.getElementById('price-alert').value;
+            alert(`Price alert set at $${alertPrice}`);
+        }
+
+        // Load stock news from backend
+        fetch('/news')
+            .then(response => response.json())
+            .then(data => {
+                const feed = document.querySelector('.news-feed');
+                feed.innerHTML = '<h2>Latest News</h2>';
+                data.articles.forEach(article => {
+                    const p = document.createElement('p');
+                    p.textContent = article;
+                    feed.appendChild(p);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching news:', error);
+                const feed = document.querySelector('.news-feed');
+                feed.innerHTML += '<p style="color:red;">Failed to load news.</p>';
+            });
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>

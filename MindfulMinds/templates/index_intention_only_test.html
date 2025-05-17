@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Intention Force | Mindful Markets</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #111;
+            color: #eee;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        h1:hover::after {
+            content: "This module visualizes the Force of Intention in a security using human-mind and market signals.";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75em;
+            white-space: normal;
+            max-width: 300px;
+        }
+
+        .card {
+            background: #222;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px #000;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .label {
+            font-weight: bold;
+            font-size: 1.4em;
+        }
+
+        .value {
+            font-size: 1.8em;
+            color: #0f0;
+        }
+
+        .signal {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #ffcc00;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 30px;
+            height: 200px;
+        }
+
+        input, button {
+            padding: 10px 15px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: none;
+        }
+
+        #tickerInput {
+            width: 80px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: #00ff88;
+            color: #000;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #00cc66;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🧠 Intention Force Tracker</h1>
+
+    <div class="card">
+        <p><span class="label">Ticker:</span> <span id="ticker">AAPL</span></p>
+        <p><span class="label">Price:</span> $<span id="price">–</span></p>
+        <p><span class="label">Intention Force:</span> <span class="value" id="f_total">–</span></p>
+        <p class="signal" id="signal">Awaiting Data...</p>
+
+        <br>
+        <input type="text" id="tickerInput" value="AAPL" oninput="updateTicker()">
+        <button onclick="loadData()">🔄 Refresh</button>
+    </div>
+
+    <canvas id="priceChart"></canvas>
+
+    <script>
+        let currentTicker = 'AAPL';
+        let chart;
+
+        function updateTicker() {
+            const newTicker = document.getElementById('tickerInput').value.trim().toUpperCase();
+            if (newTicker && newTicker !== currentTicker) {
+                currentTicker = newTicker;
+                loadData();
+            }
+        }
+
+        function loadData() {
+            fetch(`/stock/${currentTicker}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('ticker').innerText = data.symbol;
+                    document.getElementById('price').innerText = data.price;
+                    document.getElementById('f_total').innerText = data.ucip_force;
+
+                    const signalText = data.ucip_force > 0.7 ? "🚀 High Positive Intention" :
+                                       data.ucip_force < -0.5 ? "⚠️ Negative Intention Zone" :
+                                       "⏳ Neutral Watch";
+                    document.getElementById('signal').innerText = signalText;
+
+                    updateChart(data.history);
+                });
+        }
+
+        function updateChart(history) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+
+            const gradient = ctx.createLinearGradient(0, 0, 800, 0);
+            gradient.addColorStop(0, 'rgba(255, 0, 0, 0.5)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 0, 0.5)');
+            gradient.addColorStop(1, 'rgba(0, 255, 0, 0.5)');
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.map((_, i) => `T-${history.length - i}`),
+                    datasets: [{
+                        label: 'Intention Force',
+                        data: history,
+                        borderColor: gradient,
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: {
+                            beginAtZero: false,
+                            ticks: { color: '#ccc' },
+                            grid: { color: '#333' }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.onload = loadData;
+    </script>
+
+</body>
+</html>

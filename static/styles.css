@@ -1,0 +1,21 @@
+header {
+  height: 80px; /* Increase overall header height */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.logo-container {
+  height: 80px;  /* Set desired logo height */
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 100%;       /* Fill the container height */
+  width: auto;        /* Keep aspect ratio */
+  max-height: 100px;  /* Set a max size if needed */
+}
+

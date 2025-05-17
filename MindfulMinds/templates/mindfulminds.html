@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mindful Markets</title>
+    <style>
+        body { background-color: #111; color: #eee; font-family: Arial; text-align: center; padding: 30px; }
+        .card { background: #222; padding: 20px; border-radius: 10px; margin: 20px auto; width: 400px; box-shadow: 0 0 10px #000; }
+        .value { font-size: 1.5em; color: #0f0; }
+        .label { font-weight: bold; }
+        input, button { margin-top: 10px; padding: 10px; font-size: 1em; }
+    </style>
+</head>
+<body>
+    <h1>📊 Mindful Markets</h1>
+
+    <div class="card">
+        <p><span class="label">Ticker:</span> <span id="ticker">AAPL</span></p>
+        <p><span class="label">Price:</span> $<span id="price">...</span></p>
+        <p><span class="label">Intention Force:</span> <span class="value" id="f_total">...</span></p>
+        <p><span class="label">Future Intention Likelihood Scale:</span> <span class="value" id="fils">...</span></p>
+        <p><span class="label">TRUMP Tensor Chaos Factor:</span> <span class="value" id="ttcf">...</span></p>
+
+        <input type="text" id="tickerInput" value="AAPL" />
+        <button onclick="loadData()">Refresh</button>
+    </div>
+
+    <script>
+        function loadData() {
+            const symbol = document.getElementById("tickerInput").value;
+            fetch(`/stock/${symbol}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    document.getElementById("ticker").innerText = data.symbol;
+                    document.getElementById("price").innerText = data.price;
+                    document.getElementById("f_total").innerText = data.ucip_force;
+                    document.getElementById("fils").innerText = data.fils;
+                    document.getElementById("ttcf").innerText = data.ttcf;
+                });
+        }
+
+        // Load default ticker
+        window.onload = loadData;
+    </script>
+</body>
+</html>

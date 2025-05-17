@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MarketMind AI - Trading Desk</title>
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #0a0a0a;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #111;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #333;
+        }
+
+        header img {
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            color: #00ff88;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-info {
+            font-size: 1.2em;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .live-indicator {
+            background: red;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0; }
+        }
+
+        .ticker-tape {
+            background: #111;
+            color: #0f0;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1em;
+            padding: 5px 0;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+        }
+
+        main.dashboard {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            grid-gap: 20px;
+            padding: 20px;
+        }
+
+        section {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px #000;
+        }
+
+        canvas {
+            grid-column: span 3;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: #00ff88;
+            border: 1px solid #00cc66;
+            padding: 8px 14px;
+            margin: 5px;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #00cc66;
+            color: #111;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            background: #0a0a0a;
+            color: #00ff88;
+            margin-top: 10px;
+            width: 90%;
+        }
+
+        .trade-description {
+            margin-top: 20px;
+            background: #0f0f0f;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #ccc;
+            font-size: 0.95em;
+            line-height: 1.5em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="Images/marketmindai.png" alt="MarketMind AI Logo">
+        </div>
+        <div class="ticker-info">
+            <div class="live-indicator">LIVE</div>
+            <span id="ticker">IBM</span>
+            <span id="price">$123.45</span>
+            <span id="signal">Bullish</span>
+        </div>
+    </header>
+    
+<div class="ticker-tape">
+    <marquee behavior="scroll" direction="left" scrollamount="8">
+        TSLA ▲ $780.55 | AAPL ▼ $125.32 | BTC ▲ $30,200 | ETH ▼ $1,800 | AMZN ▲ $3,210 | ...
+    </marquee>
+</div>
+
+<main class="dashboard">
+    <section class="card">
+        <h2>Asset Overview</h2>
+        <p>Intention Force: <span id="intention-force">+0.75</span></p>
+        <p>Future Intention Likelihood Scale (FILS): 82%</p>
+        <p>Time to Critical Force (TTCF): 3 days</p>
+        <input type="text" id="ticker-entry" placeholder="Enter ticker symbol">
+        <button onclick="searchTicker()">Search</button>
+    </section>
+
+    <!-- Add inside <body> where you want the dropdown (e.g., next to your search input) -->
+    <section class="coin-selector">
+    <h2>Select Asset</h2>
+        <select id="coin-dropdown" onchange="changeCoin()">
+        <option value="IBM">IBM</option>
+        <option value="TSLA">TSLA</option>
+        <option value="AAPL">AAPL</option>
+        <option value="BTC">BTC</option>
+        <option value="ETH">ETH</option>
+        <option value="NVDA">NVDA</option>
+        <option value="AMZN">AMZN</option>
+        </select>
+    </section>
+
+    <section class="news">
+        <h2>Latest News</h2>
+        <ul id="news-list">
+            <li>Market expects Fed decision today</li>
+            <li>New earnings reports released</li>
+        </ul>
+    </section>
+
+    <section class="watchlist">
+        <h2>Watchlist</h2>
+        <ul id="watchlist-items">
+            <li>TSLA</li>
+            <li>BTC</li>
+            <li>NVDA</li>
+        </ul>
+    </section>
+
+    <section class="indicators">
+        <h2>Technical Indicators</h2>
+        <ul>
+            <li>Moving Average (50d): Rising</li>
+            <li>RSI: Overbought (70)</li>
+            <li>Bollinger Bands: Expanding</li>
+        </ul>
+    </section>
+
+    <section class="alerts">
+        <h2>Price Alerts</h2>
+        <input type="number" id="price-alert" placeholder="Enter price">
+        <button onclick="setPriceAlert()">Set Alert</button>
+    </section>
+
+    <section class="latent">
+        <h2>Latent Trades</h2>
+        <div id="latent-trades-list">
+            <p>Pending Buy: BTC at $29,000</p>
+            <p>Pending Sell: AAPL at $130</p>
+        </div>
+
+        <div class="trade-description">
+            <h3>Opportunity Scout Report:</h3>
+            <p>AI agents identified significant volatility spikes across tech sector equities. After clustering market classes and analyzing sentiment momentum, MarketMind AI recommended a targeted buy on TSLA and NVDA based on a combined 88% future positive likelihood scale.</p>
+            <p>Market classes affected: Tech Equities, Growth Stocks. </p>
+            <p>Action: Execute a staged entry into TSLA with initial buy limit at $770 and NVDA at $385.</p>
+        </div>
+    </section>
+
+    <!-- Existing Panel: Latest Trades -->
+<div class="...">
+  <!-- Latest Trades content here -->
+</div>
+
+<!-- New Panel: Latent Trade Setup -->
+<div class="bg-gray-900 text-white p-4 rounded-xl shadow-lg">
+  <h2 class="text-lg font-bold mb-2">Latent Trade Setup</h2>
+  <form id="latentTradeForm" class="space-y-2">
+    <div>
+      <label class="block text-sm font-medium">Trade Type</label>
+      <select class="bg-gray-800 text-white border border-gray-600 p-1 rounded w-full" name="type">
+        <option value="buy">Buy</option>
+        <option value="sell">Sell</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium">Asset Symbol</label>
+      <input type="text" name="symbol" placeholder="e.g. TSLA" class="bg-gray-800 text-white border border-gray-600 p-1 rounded w-full" required>
+    </div>
+    <div>
+      <label class="block text-sm font-medium">Target Price ($)</label>
+      <input type="number" name="price" step="0.01" class="bg-gray-800 text-white border border-gray-600 p-1 rounded w-full" required>
+    </div>
+    <div>
+      <label class="block text-sm font-medium">Strategy Notes</label>
+      <textarea name="notes" rows="2" placeholder="e.g. Entry based on AI scout alert" class="bg-gray-800 text-white border border-gray-600 p-1 rounded w-full"></textarea>
+    </div>
+    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-4 rounded w-full">
+      Set Trade
+    </button>
+  </form>
+  <div id="latentTradeStatus" class="text-sm mt-2 text-green-400 hidden">Trade Set Successfully!</div>
+</div>
+
+    <canvas id="priceChart" width="1200" height="300"></canvas>
+</main>
+
+<!-- Sound Alert -->
+<audio id="alert-sound" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
+
+<script>
+    function setPriceAlert() {
+        const price = document.getElementById('price-alert').value;
+        if (price) {
+            alert('Price alert set at $' + price);
+            document.getElementById('alert-sound').play();
+        }
+    }
+
+    function searchTicker() {
+        const ticker = document.getElementById('ticker-entry').value.toUpperCase();
+        if (ticker) {
+            document.getElementById('ticker').textContent = ticker;
+            alert('Now tracking: ' + ticker);
+        }
+    }
+
+    // Simulate new signal updates every 10 seconds
+    setInterval(() => {
+        const signals = ["Bullish", "Bearish", "Neutral"];
+        const prices = (100 + Math.random() * 50).toFixed(2);
+
+        document.getElementById('signal').textContent = signals[Math.floor(Math.random() * signals.length)];
+        document.getElementById('price').textContent = `$${prices}`;
+
+        document.getElementById('alert-sound').play();
+    }, 10000);
+</script>
+
+</body>
+</html>
+

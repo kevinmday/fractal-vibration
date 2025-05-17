@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MarketMind AI - Trading Desk</title>
+  <style>
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background-color: #0a0a0a;
+      color: #eee;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #111;
+      padding: 10px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #333;
+    }
+
+    header img {
+      height: 120px;
+      margin-right: 10px;
+    }
+
+    h1 {
+      font-size: 6.8em;
+      color: #00ff88;
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .ticker-info {
+      font-size: 1.2em;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    @keyframes blink {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0; }
+    }
+
+    .ticker-tape {
+      background: #111;
+      color: #0f0;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1em;
+      padding: 10px 0;
+      border-top: 5px solid #333;
+      border-bottom: 2px solid #333;
+    }
+
+    main.dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-gap: 20px;
+      padding: 20px;
+    }
+
+    section {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    canvas {
+      grid-column: span 3;
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      background: #00ff88;
+      border: 1px solid #00cc66;
+      padding: 8px 14px;
+      margin: 5px 0;
+      border-radius: 5px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #00cc66;
+      color: #111;
+    }
+
+    input[type="text"], input[type="number"], select, textarea {
+      padding: 8px;
+      border: 1px solid #00ff88;
+      border-radius: 5px;
+      background: #0a0a0a;
+      color: #00ff88;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .trade-description {
+      margin-top: 20px;
+      background: #0f0f0f;
+      padding: 15px;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #ccc;
+      font-size: 1.2em;
+      line-height: 1.5em;
+    }
+
+    .highlight-green {
+      color: #00ff88; /* Use the same light green color */
+      font-style: italic;
+    }
+  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+  <header style="display: flex; align-items: flex-start; justify-content: space-between; padding: 10px 20px;">
+    <!-- Logo on the top-left -->
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='MarketMindAI_cropped.png') }}" alt="Logo" class="logo-img" style="height: 120px;">
+    </div>
+  
+    <!-- Centered dashboard controls -->
+    <div style="flex-grow: 1; text-align: center;">
+      <div id="datetime" style="color:#00ff88; font-size: 1.2em; font-weight: bold;"></div>
+      <div id="market-status" style="color:#ffffff; font-size: 0.95em; font-weight: bold; margin-top: 5px;"></div>
+  
+      <div style="margin-top: 20px;">
+        <input type="text" placeholder="Search ticker..." id="ticker-entry" style="width: 140px; padding: 4px;">
+        <button onclick="searchTicker()">Search</button>
+      </div>
+  
+      <div class="ticker-info" style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
+        <div style="text-align: center;">
+          <span id="ticker" style="color:#ffffff; margin-right: 10px;">IBM</span>
+          <span id="price" style="color:#00ff88; margin-right: 10px;">$123.45</span>
+          <span id="signal" style="color:#00ff88;">Bullish</span>
+        </div>
+
+        <div style="position: fixed; bottom: 10px; right: 10px; color: #00ff88;">
+          AI Core: v2.8 | AI Agent Sync: 99%
+        </div>
+        
+      </div>
+          
+      </div>
+    
+    </div>
+  </header>
+  
+  <script>
+    function updateDateTimeAndMarkets() {
+      const now = new Date();
+      document.getElementById('datetime').textContent = now.toLocaleString();
+  
+      const marketTimes = [
+      { name: "New York (NYSE)", open: [14, 30], close: [21, 0], url: "https://www.nyse.com" },
+      { name: "London (LSE)", open: [8, 0], close: [16, 30], url: "https://www.londonstockexchange.com" },
+      { name: "Tokyo (TSE)", open: [0, 0], close: [6, 0], url: "https://www.jpx.co.jp/english/" },
+      { name: "Sydney (ASX)", open: [23, 0], close: [5, 0], url: "https://www2.asx.com.au" },
+      { name: "Shanghai (SSE)", open: [1, 30], close: [7, 0], url: "http://english.sse.com.cn" },
+      { name: "Hong Kong (HKEX)", open: [1, 30], close: [8, 0], url: "https://www.hkex.com.hk" },
+      { name: "Frankfurt (XETRA)", open: [7, 0], close: [15, 30], url: "https://www.xetra.com" },
+      { name: "Mumbai (BSE)", open: [3, 45], close: [10, 0], url: "https://www.bseindia.com" },
+      { name: "Toronto (TSX)", open: [14, 30], close: [21, 0], url: "https://www.tsx.com" },
+      { name: "São Paulo (B3)", open: [13, 0], close: [20, 0], url: "https://www.b3.com.br/en_us/" },
+      { name: "Johannesburg (JSE)", open: [7, 0], close: [15, 0], url: "https://www.jse.co.za" }
+      ];
+
+      const utcHour = now.getUTCHours();
+      const utcMin = now.getUTCMinutes();
+  
+      const marketStatus = marketTimes.map(market => {
+        const [openHour, openMin] = market.open;
+        const [closeHour, closeMin] = market.close;
+        const openTime = openHour * 60 + openMin;
+        const closeTime = closeHour * 60 + closeMin;
+        const currentTime = utcHour * 60 + utcMin;
+  
+        const isOpen = openTime < closeTime
+          ? currentTime >= openTime && currentTime < closeTime
+          : currentTime >= openTime || currentTime < closeTime;
+  
+        return `${market.name}: <span style="color:${isOpen ? '#00ff88' : '#ff5555'}">${isOpen ? 'OPEN' : 'CLOSED'}</span>`;
+      });
+  
+      document.getElementById('market-status').innerHTML = marketStatus.join(' | ');
+    }
+  
+    setInterval(updateDateTimeAndMarkets, 1000);
+    updateDateTimeAndMarkets();
+
+    // --- New script to fetch and update stock info ---
+    function updateStockInfo(symbol) {
+      if (!symbol) return;
+
+      fetch(`/stock/${symbol}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+          // Update UI elements with data from backend
+          document.getElementById('ticker').textContent = data.symbol;
+          document.getElementById('price').textContent = `$${data.price.toFixed(2)}`;
+          document.getElementById('intention-force').textContent = data.ucip_force.toFixed(2);
+          // Update FILS and TTCF paragraphs within Asset Overview section
+          const assetOverview = document.querySelector('section.card');
+          if (assetOverview) {
+            const pList = assetOverview.querySelectorAll('p');
+            if(pList.length >= 3) {
+              pList[1].textContent = `Future Intention Likelihood Scale (FILS): ${data.fils}%`;
+              pList[2].textContent = `Time to Critical Force (TTCF): ${data.ttcf} days`;
+            }
+          }
+
+          // Update signal text and color based on intention force
+          const signalEl = document.getElementById('signal');
+          if (data.ucip_force > 0) {
+            signalEl.textContent = 'Bullish';
+            signalEl.style.color = '#00ff88';
+          } else if (data.ucip_force < 0) {
+            signalEl.textContent = 'Bearish';
+            signalEl.style.color = '#ff5555';
+          } else {
+            signalEl.textContent = 'Neutral';
+            signalEl.style.color = '#cccccc';
+          }
+        })
+        .catch(err => alert('Error fetching stock data: ' + err));
+    }
+
+    // Search button click handler
+    function searchTicker() {
+      const ticker = document.getElementById('ticker-entry').value.trim().toUpperCase();
+      if (ticker) {
+        updateStockInfo(ticker);
+        // Update dropdown to reflect search
+        const dropdown = document.getElementById('coin-dropdown');
+        if(dropdown) dropdown.value = ticker;
+      } else {
+        alert('Please enter a ticker symbol.');
+      }
+    }
+
+    // Dropdown change handler
+    function changeCoin() {
+      const ticker = document.getElementById('coin-dropdown').value;
+      updateStockInfo(ticker);
+      // Update search input to reflect dropdown change
+      const input = document.getElementById('ticker-entry');
+      if(input) input.value = ticker;
+    }
+
+    // Initial load: update UI with default ticker
+    document.addEventListener('DOMContentLoaded', () => {
+      const defaultTicker = document.getElementById('coin-dropdown').value;
+      updateStockInfo(defaultTicker);
+    });
+  </script>
+
+</body>
+</html>
+
+
