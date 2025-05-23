@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MarketMind AI Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg p-4 space-y-6">
+      <h2 class="text-xl font-bold">MarketMind</h2>
+      <div>
+        <label class="block font-semibold">Assets</label>
+        <select class="w-full border mt-1" multiple>
+          <option>SPY</option>
+          <option>QQQ</option>
+          <option>VIXY</option>
+          <option>AAPL</option>
+        </select>
+      </div>
+      <div>
+        <label class="block font-semibold">Date Range</label>
+        <input type="date" class="w-full border mt-1" />
+        <input type="date" class="w-full border mt-1" />
+      </div>
+      <div>
+        <label class="block font-semibold">Metrics Version</label>
+        <select class="w-full border mt-1">
+          <option>v1</option>
+          <option>v2</option>
+        </select>
+      </div>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded w-full">Seed DB</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 overflow-auto">
+      <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+      <canvas id="intentionChart" class="bg-white p-4 rounded shadow"></canvas>
+      <div class="mt-6 bg-white p-4 rounded shadow">
+        <h2 class="font-semibold mb-2">Intention Evolution Timeline</h2>
+        <p class="text-sm text-gray-600">Interactive time-series data will render here.</p>
+      </div>
+    </main>
+
+    <!-- Chat Panel -->
+    <aside class="w-80 bg-white shadow-lg p-4 flex flex-col">
+      <h2 class="text-xl font-bold mb-2">AI Assistant</h2>
+      <div class="flex-1 overflow-auto mb-2">
+        <div class="text-sm text-gray-700">
+          <p><strong>You:</strong> Why is TSLA -1 today?</p>
+          <p><strong>AI:</strong> Based on recent data and sentiment, TSLA shows bearish trends due to...</p>
+        </div>
+      </div>
+      <textarea class="border p-2 rounded w-full" rows="3" placeholder="Ask a question..."></textarea>
+      <button class="bg-green-500 text-white px-4 py-2 mt-2 rounded">Send</button>
+    </aside>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('intentionChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['SPY', 'QQQ', 'AAPL', 'TSLA'],
+        datasets: [{
+          label: 'Intention Scale',
+          data: [0.1, 0.3, 0.05, -0.2],
+          backgroundColor: ['#34D399', '#60A5FA', '#FBBF24', '#EF4444'],
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
